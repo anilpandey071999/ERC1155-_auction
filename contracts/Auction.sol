@@ -43,8 +43,8 @@ contract Auction is ERC1155 {
 
     constructor()ERC1155("https://game.example/api/item/{id}.json") {}
 
-    function mint(address account, uint256 amount, bytes memory data) public {
-        _mint(account, tokenId, amount, data);
+    function mint(address account, uint256 amount) public {
+        _mint(account, tokenId, amount, "");
         tokenId = tokenId + 1;
     }
 
@@ -65,6 +65,8 @@ contract Auction is ERC1155 {
         auctionIteam.auctionOpen = true;
         auctionIteam.startingTime = block.timestamp;
         auctionIteam.auctionDuration = auctionDuration;
+
+        auctionId = auctionId + 1;
     }
 
     /**
