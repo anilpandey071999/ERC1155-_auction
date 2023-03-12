@@ -50,7 +50,7 @@ describe("Auction", function () {
             const tokenId = 1;
 
             const ONE_HOURS_IN_SECS = 1 * 60 * 60;
-            const creatAuction =  await auctionContract.connect(user1).createAuction(tokenId, 1, (await time.latest()) + ONE_HOURS_IN_SECS, ethers.utils.parseEther("0.15"));
+            const creatAuction =  await auctionContract.connect(user1).createAuction(tokenId, 1, ONE_HOURS_IN_SECS, ethers.utils.parseEther("0.15"));
             await creatAuction.wait();
 
             
@@ -83,7 +83,7 @@ describe("Auction", function () {
             const tokenId = 1;
 
             const ONE_HOURS_IN_SECS = 1 * 60 * 60;
-           const creatAuction =  await auctionContract.connect(user1).createAuction(tokenId, 1, (await time.latest()) + ONE_HOURS_IN_SECS, ethers.utils.parseEther("0.15"));
+           const creatAuction =  await auctionContract.connect(user1).createAuction(tokenId, 1, ONE_HOURS_IN_SECS, ethers.utils.parseEther("0.15"));
             await creatAuction.wait();
             const user1Placebid = await auctionContract.connect(user1).newBid(1, ethers.utils.parseEther("1"))
             await user1Placebid.wait()
@@ -112,7 +112,68 @@ describe("Auction", function () {
             
             expect(user2BalanceAfter).to.be.greaterThan(user2Balance)
 
-            // expect(await (await auctionContract.connect(user2).getMyBid(1)).toString()).to.be.equal(ethers.utils.parseEther("0.15").toString())
+        })
+        it("Ending Bid After SEVEN Days", async function () {
+            const { auctionContract,erc20Token, user1, user2, user3 } = await deployAuction();
+            const [,,,user4, user5, user6, user7, user8, user9, user10, user11] = await ethers.getSigners()
+            await erc20Token.connect(user4).mint(ethers.utils.parseEther("150"))
+            await erc20Token.connect(user4).approve(auctionContract.address,ethers.utils.parseEther("150"))
+            await erc20Token.connect(user5).mint(ethers.utils.parseEther("150"))
+            await erc20Token.connect(user5).approve(auctionContract.address,ethers.utils.parseEther("150"))
+            await erc20Token.connect(user6).mint(ethers.utils.parseEther("150"))
+            await erc20Token.connect(user6).approve(auctionContract.address,ethers.utils.parseEther("150"))
+            await erc20Token.connect(user7).mint(ethers.utils.parseEther("150"))
+            await erc20Token.connect(user7).approve(auctionContract.address,ethers.utils.parseEther("150"))
+            await erc20Token.connect(user8).mint(ethers.utils.parseEther("150"))
+            await erc20Token.connect(user8).approve(auctionContract.address,ethers.utils.parseEther("150"))
+            await erc20Token.connect(user9).mint(ethers.utils.parseEther("150"))
+            await erc20Token.connect(user9).approve(auctionContract.address,ethers.utils.parseEther("150"))
+            await erc20Token.connect(user10).mint(ethers.utils.parseEther("150"))
+            await erc20Token.connect(user10).approve(auctionContract.address,ethers.utils.parseEther("150"))
+            await erc20Token.connect(user11).mint(ethers.utils.parseEther("150"))
+            await erc20Token.connect(user11).approve(auctionContract.address,ethers.utils.parseEther("150"))
+
+            await auctionContract.mint(1)
+            const tokenId = 1;
+
+            await auctionContract.setApprovalForAll(auctionContract.address,true);
+
+            const SEVEN_DAYS_IN_SECS = 7 * 24 * 60 * 60;
+            
+           const creatAuction =  await auctionContract.connect(user1).createAuction(tokenId, 1, SEVEN_DAYS_IN_SECS, ethers.utils.parseEther("0.15"));
+            await creatAuction.wait();
+            const user1Placebid = await auctionContract.connect(user1).newBid(1, ethers.utils.parseEther("0.17"))
+            await user1Placebid.wait()
+            const user1Balance = parseInt(await (await erc20Token.balanceOf(user1.address)).toString())
+            const user2Placebid = await auctionContract.connect(user2).newBid(1,ethers.utils.parseEther("0.18"))
+            await user2Placebid.wait()
+            const usder3placebid = await auctionContract.connect(user3).newBid(1,ethers.utils.parseEther("1"))
+            await usder3placebid.wait()
+            const usder4placebid = await auctionContract.connect(user4).newBid(1,ethers.utils.parseEther("0.19"))
+            await usder4placebid.wait()
+            const usder5placebid = await auctionContract.connect(user5).newBid(1,ethers.utils.parseEther("0.20"))
+            await usder5placebid.wait()
+            const usder6placebid = await auctionContract.connect(user6).newBid(1,ethers.utils.parseEther("0.21"))
+            await usder6placebid.wait()
+            const usder7placebid = await auctionContract.connect(user7).newBid(1,ethers.utils.parseEther("0.22"))
+            await usder7placebid.wait()
+            const usder8placebid = await auctionContract.connect(user8).newBid(1,ethers.utils.parseEther("0.23"))
+            await usder8placebid.wait()
+            const usder9placebid = await auctionContract.connect(user9).newBid(1,ethers.utils.parseEther("0.24"))
+            await usder9placebid.wait()
+            const usder10placebid = await auctionContract.connect(user10).newBid(1,ethers.utils.parseEther("0.25"))
+            await usder10placebid.wait()
+            const usder11placebid = await auctionContract.connect(user11).newBid(1,ethers.utils.parseEther("0.26"))
+            await usder11placebid.wait()
+            const user1BalanceAfter = parseInt(await (await erc20Token.balanceOf(user1.address)).toString())
+            
+            expect(user1BalanceAfter).to.be.greaterThan(user1Balance)
+
+            await time.increase(SEVEN_DAYS_IN_SECS + 10);
+            const endAuction = await auctionContract.endAuction(1)
+            await endAuction.wait();
+        
+            expect(await (await auctionContract.balanceOf(user3.address,1)).toString()).to.be.equal("1")
         })
 
     })

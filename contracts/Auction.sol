@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "hardhat/console.sol";
+// import "hardhat/console.sol";
 
 contract Auction is ERC1155, Ownable {
     IERC20 token;
@@ -164,11 +164,11 @@ contract Auction is ERC1155, Ownable {
         )
     {
         // AuctionIteam storage auctionIteam = auctions[auctionId];
-        uint256 _hightestBid = biddings[_auctionId][1].bidAmount;
-        address _hightestBidder = biddings[_auctionId][1].bidder;
-        uint32 _hightestBidderIndex = 1;
+        uint256 _hightestBid = 0;
+        address _hightestBidder = address(0);
+        uint32 _hightestBidderIndex = 0;
         for (uint32 i = 1; i <= maxBid; i++) {
-            if (_hightestBid > biddings[_auctionId][i].bidAmount) {
+            if (_hightestBid < biddings[_auctionId][i].bidAmount) {
                 _hightestBid = biddings[_auctionId][i].bidAmount;
                 _hightestBidder = biddings[_auctionId][i].bidder;
                 _hightestBidderIndex = i;
@@ -183,6 +183,9 @@ contract Auction is ERC1155, Ownable {
             auctionIteam.artist == msg.sender,
             "Only artist of the auction can call this function"
         );
+        uint256 auctionEndTime = auctionIteam.startingTime +
+            auctionIteam.auctionDuration;
+        require(auctionEndTime <= block.timestamp, "Auction has not Ended yet");
         (uint256 hightestBid, address hightestBidder, ) = findHightestBider(
             _auctionId
         );
@@ -217,12 +220,7 @@ contract Auction is ERC1155, Ownable {
                 myBid = biddings[_auctionId][i].bidAmount;
             }
         }
-        // console.log(biddings[_auctionId][1].bidAmount, index,msg.sender == biddings[_auctionId][1].bidder);
         return myBid;
-    }
-
-    function getBalance() public view returns (uint) {
-        return address(this).balance;
     }
 
     function changeMaxBid(uint32 _maxBid) external onlyOwner {
